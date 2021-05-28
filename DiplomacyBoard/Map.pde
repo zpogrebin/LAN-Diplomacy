@@ -17,8 +17,10 @@ class Board {
   float w, h;
   Timer auxTime;
   Timer moveTime;
+  boolean paused;
 
   Board(String variant, String saveFile, Timer moveTime, Timer auxTime) {
+    paused = false;
     regions = new HashMap<String, Region>();
     players = new HashMap<String, Player>();
     year = 0;
@@ -70,12 +72,12 @@ class Board {
   }
   
   void update() {
-    boolean next = false;
-    if(auxTime != null) {
+    if(!paused) {
+      boolean next = false;
       next |= auxTime.update();
       next |= moveTime.update();
+      if(next) advanceSeasons();
     }
-    if(next) advanceSeasons();
   }
   
   void updateRender() {
@@ -134,6 +136,7 @@ class Board {
         else if(cmds[0].equals("@")) setOccupier(cmds);
         else if(cmds[0].equals("<")) setOwner(cmds, midGame);
         else if(cmds[0].equals("date")) setDate(cmds[1], cmds[2], cmds[3]);
+        else if(cmds[0].equals("next")) advanceSeasons();
       } catch(Exception e) {
         println("\nERROR ON: " + line);
         println("EXCEPTION: " + e + "\n");
@@ -300,7 +303,10 @@ class Board {
   }
 
   String getTime() {
-    return "time, time";
+    String[] sSeq;
+    if(phase == Phases.MOVEPHASE) sSeq = moveTime.getTimeSequenceStrings();
+    else sSeq = auxTime.getTimeSequenceStrings();
+    return addCommand("time", String.join(" ",sSeq));
   }
 
   String joinGame(String passphrase) {
@@ -323,6 +329,7 @@ class Board {
     if(p == null) return "Error: invalid passphrase";
     String data = p.getUpdatedData();
     data += addCommand("date", getPhase());
+    data += getTime();
     return data;
   }
 
@@ -358,6 +365,8 @@ class Board {
 
   void advanceSeasons() {
     //TODO ACTUALLY ADJUDICATE MOVES;
+    auxTime.stop();
+    moveTime.stop();
     println("Advancing game");
     adjudicatePhase();
     println("adjudication done");
@@ -378,6 +387,8 @@ class Board {
     }
     updateRender();
     defaultOrders(phase);
+    if(phase == Phases.MOVEPHASE) moveTime.start();
+    else auxTime.start();
   }
 
   boolean retreatsNecessary() {

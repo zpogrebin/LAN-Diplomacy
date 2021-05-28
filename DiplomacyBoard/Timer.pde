@@ -78,16 +78,12 @@ class Timer {
   
   int[] getTimeSequence(int millis) {
     return new int[] {
-      getHundredths(millis),
-      getSeconds(millis),
-      getMinutes(millis),
+      getDays(millis),
       getHours(millis),
-      getDays(millis)
+      getMinutes(millis),
+      getSeconds(millis),
+      getHundredths(millis)
     };
-  }
-  
-  String getColonSeparated() {
-    return String.join(":", getTimeSequenceStrings());
   }
   
   String getColonSeparated(int sigfigs) {
@@ -98,9 +94,9 @@ class Timer {
       if(j == 0 && iSeq[i] == 0) continue;
       if(j == sigfigs) break;
       j++;
-      sSeq.add(String.format("%02d", String.valueOf(iSeq[i])));
+      sSeq.add(String.format("%02d", iSeq[i]));
     }
-    while(sSeq.size() < sigfigs) sSeq.add("00");
+    while(sSeq.size() < sigfigs) sSeq.add(0, "00");
     return String.join(":", sSeq);
   }
   

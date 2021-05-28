@@ -22,6 +22,7 @@ class GameServer {
   UIIncrementBox serverPort;
   UITimer auxTime;
   UITimer moveTime;
+  UIButton pauseButton;
   
   GameServer(PApplet parent) {
     uix = 34;
@@ -53,6 +54,7 @@ class GameServer {
     serverPort = new UIIncrementBox(p, "Port", c, 6969, 1);//(int)random(1, 65535)
     p.set_coords(352+uix,50+uiy,90,80);
     startButton = new UIMomentary(p, "Start Game", c);
+    pauseButton = new UIButton(p, "Pause", c);
   }
   void update() {
     if(!gameInProgress) {
@@ -69,6 +71,15 @@ class GameServer {
       else saveSelectButton.update();
     } else {
       parseCommands();
+      m.update();
+      pauseButton.update();
+      if(pauseButton.getValue()) {
+        m.paused = true;
+        pauseButton.setId("Play");
+      } else {
+        m.paused = false;
+        pauseButton.setId("Pause");
+      }
     }
   }
   
@@ -116,6 +127,7 @@ class GameServer {
       moveTime.draw();
     } else {
       m.draw();
+      pauseButton.draw();
     }
   }
   
@@ -129,10 +141,11 @@ class GameServer {
   
   void startGame() {
     gameInProgress = true;
-    if(loadNewGame) m = new Board(variantButton.getValue(), null, auxTime.t, moveTime.t);
+    if(loadNewGame) m = new Board(variantButton.getValue(), null, moveTime.t, auxTime.t);
     m.updateRender();
     surface.setSize((int)m.w, (int)m.h);
     port = (int)serverPort.getValue();
     server = new Server(parent, port);
+    pauseButton.setP(new PositionSpecifier(m.w-100, m.h-100, 50, 50));
   }
 }
