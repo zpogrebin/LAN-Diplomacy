@@ -20,6 +20,8 @@ class GameServer {
   UIToggleV saveSelectButton;
   UIToggleH newGameButton;
   UIIncrementBox serverPort;
+  UITimer auxTime;
+  UITimer moveTime;
   
   GameServer(PApplet parent) {
     uix = 34;
@@ -43,6 +45,10 @@ class GameServer {
     } else gamesAvailable = false;
     if(!gamesAvailable) p.set_coords(uix,uiy,140,130);
     variantButton = new UIToggleV(p, "Select Variant", c, variants);
+    p.set_coords(uix + 150,uiy,120, 40);
+    moveTime = new UITimer(p, "move", c, 0, 30, 1, 5);
+    p.set_coords(uix + 150,uiy+50,120, 40);
+    auxTime = new UITimer(p, "aux", c, 0, 15, 1, 5);
     p.set_coords(352+uix,uiy,90,40);
     serverPort = new UIIncrementBox(p, "Port", c, 6969, 1);//(int)random(1, 65535)
     p.set_coords(352+uix,50+uiy,90,80);
@@ -57,6 +63,8 @@ class GameServer {
         newGameButton.update();
         loadNewGame = newGameButton.getIndex()==0;
       }
+      auxTime.update();
+      moveTime.update();
       if(loadNewGame) variantButton.update();
       else saveSelectButton.update();
     } else {
@@ -104,15 +112,25 @@ class GameServer {
       startButton.draw();
       if(gamesAvailable) newGameButton.draw();
       serverPort.draw();
+      auxTime.draw();
+      moveTime.draw();
     } else {
       m.draw();
     }
   }
   
+  void keyPressed(char k) {
+    if(!gameInProgress) {
+      serverPort.keyPressed(k);
+      auxTime.keyPressed(k);
+      moveTime.keyPressed(k);
+    }
+  }
+  
   void startGame() {
     gameInProgress = true;
-    if(loadNewGame) m = new Board(variantButton.getValue());
-    m.update();
+    if(loadNewGame) m = new Board(variantButton.getValue(), null, auxTime.t, moveTime.t);
+    m.updateRender();
     surface.setSize((int)m.w, (int)m.h);
     port = (int)serverPort.getValue();
     server = new Server(parent, port);

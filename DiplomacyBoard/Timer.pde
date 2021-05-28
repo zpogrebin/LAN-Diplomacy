@@ -67,7 +67,7 @@ class Timer {
   int getMinutes() {return getMinutes(currTime);}
   int getHours() {return getHours(currTime);}
   int getDays() {return getDays(currTime);}
-  int[] getTimeSequence() {return getTimeSequence(currTime);} 
+  int[] getTimeSequence() {return getTimeSequence(currTime);}
   
   String[] getTimeSequenceStrings() {
     int iSeq[] = getTimeSequence();
@@ -90,21 +90,87 @@ class Timer {
     return String.join(":", getTimeSequenceStrings());
   }
   
+  String getColonSeparated(int sigfigs) {
+    int[] iSeq = getTimeSequence();
+    ArrayList<String> sSeq = new ArrayList<String>();
+    int j = 0;
+    for(int i = 0; i < iSeq.length; i++) {
+      if(j == 0 && iSeq[i] == 0) continue;
+      if(j == sigfigs) break;
+      j++;
+      sSeq.add(String.format("%02d", String.valueOf(iSeq[i])));
+    }
+    while(sSeq.size() < sigfigs) sSeq.add("00");
+    return String.join(":", sSeq);
+  }
+  
   String getStringSeparated() {
     String ret = "";
-    String[] seq = getTimeSequenceStrings();
     boolean started = false;
+    String[] seq = getTimeSequenceStrings();
     for(int i = 0; i < seq.length; i++) {
+      if(!started && Integer.valueOf(seq[i]) == 0) continue;
+      started = true;
       ret += seq[i] + VALS[i] + " ";
     }
     return ret;
   }
   
-  void setByColonSeparated(String input, int offset) {
-    String[] sSeq = input.split(":");
-    int[] iSeq = new int[sSeq.length];
-    int[] timeSeq = new int[] {PERHUN, PERSEC, PERMIN, PERHOUR, PERDAY};
-    for(int i = 0; i < iSeq.length; i++) iSeq[i] = Integer.valueOf(sSeq[i]);
-    f
+  void setByHMS(int hours, int minutes, int seconds) {
+    set(hours * PERHOUR + minutes * PERMIN + seconds * PERSEC);
   }
+}
+
+class UITimer extends UIElement {
+  
+  UIIncrementBox hours;
+  UIIncrementBox minutes;
+  Timer t;
+  
+  UITimer(PositionSpecifier p, String label, ColorScheme cs, int dHours, int dMinutes) {
+    this(p, label, cs, dHours, dMinutes, 1, 1);
+  }
+  
+  UITimer(PositionSpecifier p, String label, ColorScheme cs, int dHours, int dMinutes, int hInc, int mInc) {
+    super(p, label, cs);
+    p.set_coords(p.x, p.y, p.w/2, p.h);
+    hours = new UIIncrementBox(p, "hours", cs, dHours, hInc);
+    p.set_coords(p.x + p.w, p.y, p.w, p.h);
+    minutes = new UIIncrementBox(p, "minutes", cs, dMinutes, mInc);
+    t = new Timer(0);
+  }
+  
+  void setTime() {
+    t.setByHMS(
+      (int)hours.getValue(),
+      (int)minutes.getValue(),
+      0
+    );
+  }
+  
+  void update() {
+    hours.update();
+    minutes.update();
+    if(minutes.getValue() < 0) {
+      minutes.setValue(0);
+      hours.setValue(hours.getValue() - 1);
+    }
+    if(hours.getValue() < 0) hours.setValue(0);
+    if(minutes.getValue() >= 60) {
+      minutes.setValue(minutes.getValue() - 60);
+      hours.setValue(hours.getValue() + 1);
+    }
+    setTime();
+  }
+  
+  void draw() {
+    hours.draw();
+    minutes.draw();
+  }
+  
+  void keyPressed(char k) {
+    hours.keyPressed(k);
+    minutes.keyPressed(k);
+  }
+  
 }

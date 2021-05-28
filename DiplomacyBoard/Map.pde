@@ -15,10 +15,10 @@ class Board {
   PShape labelPattern;
   PShape render;
   float w, h;
-  int moveTime;
-  int auxTime;
+  Timer auxTime;
+  Timer moveTime;
 
-  Board(String variant, String saveFile, int moveTime, int auxTime) {
+  Board(String variant, String saveFile, Timer moveTime, Timer auxTime) {
     regions = new HashMap<String, Region>();
     players = new HashMap<String, Player>();
     year = 0;
@@ -27,13 +27,15 @@ class Board {
     loadFromFile(dataPath("variants/" + variant + "/start.ddat"), variant);
     loadShapes(dataPath("variants/" + variant + "/map.svg"));
     defaultOrders(phase);
+    this.auxTime = auxTime;
+    this.moveTime = moveTime;
     if(saveFile != null) {
       ;
     }
   }
   
   Board(String variant) {
-    this(variant, null, 900000, 90000);
+    this(variant, null, null, null);
   }
   
   String getInfo() {
@@ -63,9 +65,19 @@ class Board {
     textAlign(LEFT, CENTER);
     fill(0);
     text(getPhase(), 50, h-50);
+    text(
   }
   
   void update() {
+    boolean next = false;
+    if(auxTime != null) {
+      next |= auxTime.update();
+      next |= moveTime.update();
+    }
+    if(next) advanceSeasons();
+  }
+  
+  void updateRender() {
     render = getMapRender(null);
   }
   
@@ -317,7 +329,7 @@ class Board {
     Player p = getPlayer(passphrase);
     if(p == null) return "Error: invalid passphrase";
     String response = p.orderHandler(orders);
-    update(); //TEMPORARY;
+    updateRender(); //TEMPORARY;
     return response;
   }
   
@@ -363,7 +375,7 @@ class Board {
       year += 1;
       phase = Phases.MOVEPHASE;
     }
-    update();
+    updateRender();
     defaultOrders(phase);
   }
 
@@ -405,7 +417,7 @@ class Board {
         allDone = !b.simulateBattle(false);
       }
     }
-    update(); // temporary
+    updateRender(); // temporary
     for(Battle b : battles.values()) b.simulateBattle(true);
   }
   

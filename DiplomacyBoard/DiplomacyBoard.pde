@@ -74,5 +74,6 @@ String addCommand(String cmd, String arg) {
 }
 
 void keyPressed() {
+  gs.keyPressed(key);
   if(key == 'a') gs.m.advanceSeasons();
 }
