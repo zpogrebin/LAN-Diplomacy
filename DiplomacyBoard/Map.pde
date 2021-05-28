@@ -15,8 +15,10 @@ class Board {
   PShape labelPattern;
   PShape render;
   float w, h;
+  int moveTime;
+  int auxTime;
 
-  Board(String variant) {
+  Board(String variant, String saveFile, int moveTime, int auxTime) {
     regions = new HashMap<String, Region>();
     players = new HashMap<String, Player>();
     year = 0;
@@ -25,6 +27,13 @@ class Board {
     loadFromFile(dataPath("variants/" + variant + "/start.ddat"), variant);
     loadShapes(dataPath("variants/" + variant + "/map.svg"));
     defaultOrders(phase);
+    if(saveFile != null) {
+      ;
+    }
+  }
+  
+  Board(String variant) {
+    this(variant, null, 900000, 90000);
   }
   
   String getInfo() {
