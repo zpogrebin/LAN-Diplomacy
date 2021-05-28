@@ -65,7 +65,8 @@ class Board {
     textAlign(LEFT, CENTER);
     fill(0);
     text(getPhase(), 50, h-50);
-    text(
+    if(phase == Phases.MOVEPHASE) text(moveTime.getColonSeparated(2), 50, h-20);
+    else text(auxTime.getColonSeparated(2), 50, h-20);
   }
   
   void update() {
