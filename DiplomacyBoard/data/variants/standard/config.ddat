@@ -1,0 +1,259 @@
+//Player List
+player France Fra 11117F
+player Germany Deu 1E0000
+player Russia Rus 662D91
+player Italy Ita 117F1B
+player Turkey Tur 7F7F11
+player England Eng 127F7A
+player Austria-Hungary Aus 7F1111
+//Map Regions
+sea Barents_Sea
+sea North_Atlantic_Ocean NAO
+sea Norwegian_Sea NWS
+sea North_Sea NoS
+sea Baltic_Sea
+sea Gulf_of_Bothnia GOB
+sea English_Channel Cha
+sea Irish_Sea
+sea Mid_Atlantic_Ocean MAO
+sea Western_Mediterranean WMD
+sea Gulf_of_Lyon GOL
+sea Tyrrhenian_Sea Trr
+sea Ionian_Sea
+sea Adriatic_Sea Adr
+sea Aegean_Sea
+sea Eastern_Mediterranean EMD
+sea Black_Sea
+sea Skagerrack
+sea Heligoland_Bight
+//Land Regions
+    //Russia
+        coastal St_Petersberg Pet center < Rus
+        land Finland < Rus
+        land Moscow center < Rus
+        land Sevastopol center < Rus
+        land Warsaw center < Rus
+        land Ukraine < Rus
+        land Livonia < Rus
+    //Turkey
+        land Armenia < Tur
+        land Syria < Tur
+        land Smyrna center < Tur
+        land Ankara center < Tur
+        land Constantinople center < Tur
+    //Austria
+        land Trieste center < Aus
+        land Budapest center < Aus
+        land Galicia < Aus
+        land Vienna center < Aus
+        land Bohemia < Aus
+        land Tyrolia Tyr < Aus
+    //Italy
+        land Naples center < Ita
+        land Apulia < Ita
+        land Piedmont < Ita
+        land Venice center < Ita
+        land Tuscany < Ita
+        land Rome center < Ita
+    //France
+        land Marseilles center < Fra
+        land Gascony < Fra
+        land Bgdgondy < Fra
+        land Brest center < Fra
+        land Picardy < Fra
+        land Paris center < Fra
+    //England
+        land London center < Eng
+        land York < Eng
+        land Wales < Eng
+        land Liverpool Lyp center < Eng
+        land Edinborough center < Eng
+        land Clyde < Eng
+    //Germany
+        land Prussia < Deu
+        land Silesia < Deu
+        land Munich center < Deu
+        land Ruhr < Deu
+        land Kiel center < Deu
+        land Berlin center < Deu
+    //None
+        land Rumania center
+        coastal Bulgaria center
+        land Greece center
+        land Serbia center
+        land Albania
+        land Tunis center 
+        land North_Africa NAf
+        coastal Spain center
+        land Portugal center
+        land Belgium center
+        land Norway Nwy center
+        land Holland center
+        land Sweden center
+        land Denmark center
+//Connections
+connect Mos l.Sev l.Ukr l.Pet l.War l.Liv
+connect Sev s.Bla Rum Arm l.Mos l.Ukr
+connect Ukr l.Sev l.Mos l.War l.Rum l.Gal
+connect War l.Pru l.Sil l.Gal l.Liv
+connect Liv s.Bal s.GOB l.Mos l.War
+cncoast Pet s.Fin s.GOB s.Liv n.Bar n.Nwy l.Mos l.Fin l.Liv
+connect Fin s.GOB s.Swe l.Nwy 
+connect Arm s.Bla l.Syr l.Smy Ank Sev
+connect Syr s.EMD Smy l.Arm
+connect Ank s.Bla Arm Con l.Smy
+connect Smy l.Ank Syr l.Arm Con s.EMD s.Aeg
+connect Con l.Bul s.Bla s.Aeg Ank Smy
+connect Kie Hol Den Ber l.Ruh l.Sil s.Hel s.Bal l.Mun
+connect Ber Pru Kie l.Sil l.Mun s.Bal
+connect Pru l.War Liv s.Bal l.Sil Ber
+connect Sil l.Boh l.Gal l.Mun l.War l.Pru l.Ber
+connect Mun l.Tyr l.Bgd l.Ruh l.Mun l.Boh
+connect Ruh l.Kie l.Bel l.Hol l.Mun
+connect Gal l.Ukr l.Rum l.Bud l.Vie l.Boh l.Sil l.War
+connect Bud l.Gal l.Rum l.Ser l.Tri l.Vie
+connect Tri s.Adr Ven Alb l.Ser l.Bud l.Vie l.Tyr
+connect Tyr l.Mun l.Boh l.Vie l.Tri l.Ven l.Pie
+connect Boh l.Sil l.Gal l.Vie l.Tyr l.Mun
+connect Ven Apu Tri s.Adr l.Tyr l.Pie l.Tus l.Rom
+connect Pie l.Tyr Mar s.GOL l.Ven Tus
+connect Tus Pie Rom l.Ven s.GOL s.Trr
+connect Rom Nap Tus s.Tyr s.GOL l.Apu l.Ven
+connect Nap s.Trr s.Ion Apu Rom
+connect Apu s.Ion s.Adr Nap Ven l.Rom
+connect Mar s.GOL Pie l.Spa s.Spa l.Gas l.Bgd
+connect Gas s.MAO l.Spa n.Spa l.Bgd l.Par Bre
+connect Bgd l.Bel l.Pic l.Ruh l.Mun l.Mar l.Gas l.Par
+connect Par l.Gas l.Bre l.Pic l.Bgd
+connect Bre s.Cha s.MAO Gas Pic l.Par
+connect Pic Bel Bre s.Cha l.Bgd l.Par
+connect Edi s.NoS s.NWS Cly Yor l.Lyp
+connect Yor s.NoS Lon Edi l.Lyp l.Wal
+connect Lon s.Cha s.NoS Wal Yor
+connect Wal s.Eng s.Iri Lyp Lon l.Yor
+connect Lyp s.Iri s.NAO l.Yor Wal Cly l.Edi
+connect Cly Lyp Edi s.NAO s.NWS
+connect Por s.MAO s.Spa_nc l.Spa
+cncoast Spa s.n.MAO l.n.Gas s.WMD s.GOL s.l.Mar
+connect NAf s.MAO s.WMD Tun
+connect Tun NAf s.Ion s.Trr s.WMD
+connect Gre Alb l.Bul s.Bul_sc l.Ser s.Aeg s.Ion
+connect Alb Tri Gre l.Ser s.Adr s.Ion
+connect Ser l.Tri l.Bud l.Rum l.Bul l.Gre l.Alb
+cncoast Bul s.Bla n.l.Rum Con l.Ser s.l.Gre s.Aeg
+connect Rum s.Bla Sev l.Ukr l.Gal l.Bud l.Ser
+connect Nwy s.Bar s.NWS s.NoS s.Ska Swe l.Fin
+connect Fin s.GOB s.Bal s.Ska Nwy Fin Swe
+connect Bel s.Cha s.NoS Hol Pic l.Ruh l.Bgd
+connect Hol s.Hel s.NoS Kie Bel l.Ruh
+connect Den Swe Kie s.Bal s.Ska s.Hel s.NoS
+connect Bar s.NWS
+connect NWS s.NAO s.Bar s.NoS
+connect NoS s.Hel s.Ska s.Cha
+connect Hel s.NoS
+connect GOB s.Bal
+connect Bal s.GOB s.Ska
+connect Ska s.NoS s.Bal
+connect NAO s.NWS s.MAO s.Iri
+connect Iri s.Cha s.MAO s.NAO
+connect Cha s.NoS s.MAO s.Iri 
+connect MAO s.WMD s.NAO s.Iri S.Cha
+connect WMD s.MAO s.GOL s.Trr 
+connect GOL s.WMD s.Trr
+connect Trr s.WMD s.GOL s.Ion 
+connect Ion s.Adr s.Aeg s.EMD
+connect Adr s.Ion 
+connect Aeg s.EMD s.Ion
+connect EMD s.Aeg s.Ion
+//Positioning
+pos Sev 801.380.776.459
+pos Mos 733.296
+pos Pet 712.220.664.56.661.218
+pos War 605.339
+pos Ukr 696.393
+pos Fin 611.106.596.110
+pos Arm 920.521.898.519
+pos Syr 893.616.880.639
+pos Smy 804.599.799.626
+pos Con 705.567
+pos Ank 818.526.807.515
+pos Bud 591.464
+pos Gal 642.408
+pos Vie 512.424
+pos Tri 505.463.509.506
+pos Tyr 441.440
+pos Boh 478.391
+pos Rum 717.475.711.466
+pos Bul 664.540.710.513.667.559
+pos Gre 606.616
+pos Alb 570.563
+pos Ser 590.524
+pos Tun 339.633
+pos NAf 272.638.175.624
+pos Spa 143.550.159.457.142.578
+pos Por 84.541
+pos Gas 245.471.221.456
+pos Bre 255.397.224.367
+pos Pic 309.359
+pos Par 291.383
+pos Bgd 315.427
+pos Mar 330.471.338.498
+pos Pie 385.482
+pos Ven 452.498
+pos Tus 421.528
+pos Nap 487.621
+pos Rom 463.567
+pos Apu 522.572
+pos Bel 324.326
+pos Hol 368.312
+pos Den 433.249
+pos Wal 254.307
+pos Lon 288.309
+pos Yor 312.249
+pos Edi 301.193
+pos Cly 273.177
+pos Lyp 275.223
+pos Kie 424.307.427.296
+pos Ber 469.343.484.320
+pos Pru 537.311
+pos Sil 532.365
+pos Mun 436.375
+pos Ruh 386.372
+pos Bar 687.29
+pos Nwy 477.124
+pos Swe 527.223
+pos NWS 361.91
+pos NAO 104.72
+pos Cha 240.330
+pos NoS 361.244
+pos Hel 406.278
+pos Ska 463.219
+pos GOB 572.203
+pos Bal 533.276
+pos GOL 274.540
+pos WMD 312.580
+pos Trr 393.566
+pos Ion 542.622
+pos Aeg 661.601
+pos EMD 780.645
+pos Bla 758.503
+pos MAO 51.423
+pos Liv 627.307.591.261
+pos NAO 125.174
+pos NWS 400.84
+pos Bar 723.16
+pos NoS 364.245
+pos Hel 407.277
+pos Ska 469.226
+pos Bal 548.271
+pos GOB 565.178
+pos Iri 202.290
+pos Cha 237.332
+pos MAO 56.437
+pos GOL 298.529
+pos Trr 403.559
+pos Ion 550.628
+pos Aeg 657.604
+pos EMD 774.642
+pos Bla 751.503
+pos Adr 536.558
