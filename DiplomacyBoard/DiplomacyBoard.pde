@@ -1,6 +1,7 @@
 GameServer gs;
 
 void setup() {
+  setupFonts();
   surface.setSize(515, 768);
   surface.setLocation(0,0);
   pixelDensity(displayDensity());

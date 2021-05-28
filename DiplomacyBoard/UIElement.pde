@@ -212,7 +212,7 @@ class UITextBox extends UIElement {
   protected UIButton button;
   protected int last_press;
   protected int cursor_time = 0;
-  protected boolean key_repeat;
+  protected boolean key_handled;
   protected int[] selection = new int[]{0,0};
   protected PositionSpecifier cp;
   public String suffix = "";
@@ -291,8 +291,9 @@ class UITextBox extends UIElement {
   }
   
   void drawCursor() {
-    if(millis() - cursor_time > 800) cursor_time = millis() + 200;
-    else if(millis() - cursor_time > 400 || keyPressed) { 
+    if(millis() - cursor_time > 800) cursor_time = millis();
+    else if(millis() - cursor_time > 400 || keyPressed) {
+      textSize(c.fontSize);
       cp.x = p.x + 1.25 + min(p.w - 10, textWidth(curr_value) + 10);
       cp.makeRect(tbcs.text);
     }
@@ -309,35 +310,29 @@ class UITextBox extends UIElement {
   }
   
   void update() {
+    if(key_handled) text("REPT", 300, 360);
+    else text("NO", 300, 360);
     button.update();
     if(button.getValue() && !typing) startTyping();
     if(typing) {
       if(mousePressed && !p.mouseOver()) stopTyping();
-      if(keyPressed) keyPressed();
-      else lastkey = '\0';
     }
     button.setValue(typing);
   }
   
-  protected void keyPressed() {
-    if(key == lastkey) {
-      if(key_repeat && millis() - last_press < 40) return;
-      else if(!key_repeat && millis() -last_press < 750) return;
-      key_repeat = true;
-    } else key_repeat = false;
-    lastkey = key;
-    last_press = millis();
-    if(key == ENTER || key == RETURN) {
+  void keyPressed(char k) {
+    if(k == 0 || !typing) return;
+    if(k == ENTER || k == RETURN) {
       stopTyping();
-    } else if(key == ESC) {
+    } else if(k == ESC) {
       typing = false;
-    } else if(key == DELETE || key == BACKSPACE) {
+    } else if (k == CODED) {
+      return;
+    } else if(k == DELETE || k == BACKSPACE) {
       if(curr_value.length() == 0) return;
       curr_value = curr_value.substring(0, curr_value.length() - 1);
-    } else if(key == CODED) {
-      return;
     } else {
-      curr_value += key;
+      curr_value += k;
     }
   }
 }
@@ -410,5 +405,208 @@ class UIIncrementBox extends UIElement {
     if(up.getValue()) value += increment;
     if(down.getValue()) value -= increment;
     text_box.setValue(nf(value, 0, 0));
+  }
+  
+  void keyPressed(char k) {
+    text_box.keyPressed(k);
+  }
+}
+
+class UIDropDown extends UIElement {
+  
+  private ArrayList<UIMomentary> buttons;
+  private int selected = -1;
+  private ColorScheme altcs;
+  private boolean open;
+  private boolean justClosed;
+  
+  UIDropDown(PositionSpecifier p, String name, ColorScheme cs, String[] values, String curr) {
+    super(p, name, cs);
+    altcs = new ColorScheme(cs.clicked, cs.highlight, cs.unclicked, cs.clickedtext, cs.text);
+    buttons = new ArrayList<UIMomentary>();
+    for(int i = 0; i < values.length; i++) {
+      buttons.add(new UIMomentary(p, values[i], cs));
+      if(values[i].equals(curr)) setClosed(i);
+    }
+    if(selected < 0) setClosed(0);
+    justClosed = false;
+  }
+  
+  UIDropDown(PositionSpecifier p, String name, ColorScheme cs, String[] values) {
+    super(p, name, cs);
+    altcs = new ColorScheme(cs.clicked, cs.highlight, cs.unclicked, cs.clickedtext, cs.text);
+    buttons = new ArrayList<UIMomentary>();
+    for(int i = 1; i < values.length; i++) {
+      buttons.add(new UIMomentary(p, values[i], cs));
+      if(values[i].equals(values[0])) setClosed(i-1);
+    }
+    if(selected < 0) setClosed(0);
+    justClosed = false;
+  }
+  
+  private void setClosed(int selected) {
+    buttons.get(selected).c = c;
+    this.selected = selected;
+    open = false;
+    p.set_coords(p.x, p.y, getWidth(),p.h);
+    buttons.get(selected).setP(p);
+    justClosed = true;
+  }
+  
+  private void setOpen() {
+    open = true;
+    PositionSpecifier newP = new PositionSpecifier(0,0,0,0);
+    p.set_coords(p.x,p.y,getWidth(),p.h);
+    for(UIMomentary button: buttons) {
+      newP.set_coords(p.x,p.y+p.h*(buttons.indexOf(button)-selected),p.w, p.h);
+      button.setP(newP);
+    }
+    buttons.get(selected).c = altcs;
+  }
+  
+  String getValue() {
+    return buttons.get(selected).label;
+  }
+  
+  float getWidth() {
+    if(open) return getMaxWidth()+10;
+    else return 10+textWidth(buttons.get(selected).label);
+  }
+  
+  float getMaxWidth() {
+    float max = 0;
+    float curr;
+    for(UIMomentary button: buttons) {
+      curr = textWidth(button.label);
+      if(curr > max) max = curr;
+    }
+    return max;
+  }
+  
+  void update() {
+    if(!open) {
+      buttons.get(selected).p = p;
+      buttons.get(selected).update();
+      if(buttons.get(selected).getValue()) setOpen();
+    } else {
+      for(UIMomentary button : buttons) button.update();
+      if(mousePressed) {
+        boolean outside = mouseY < p.y-p.h*selected;
+        outside |= mouseY > p.y+p.h*(buttons.size()-selected);
+        outside |= mouseX < p.x || mouseX > p.x+p.w;
+        if(outside) setClosed(selected);
+      }
+      for(int i = 0; i < buttons.size(); i++) {
+        if(buttons.get(i).getValue()) setClosed(i);
+      }
+    }
+  }
+  
+  PositionSpecifier updateC(PositionSpecifier activePos) {
+    if(activePos == null) update();
+    else if(!activePos.mouseOver() || open) update();
+    if(open) activePos = getP();
+    if(justClosed) activePos = null;
+    return activePos;
+  }
+  
+  PositionSpecifier getP() {
+    float y = p.y-p.h*selected;
+    float h = p.h*buttons.size();
+    return new PositionSpecifier(p.x, y, getWidth(), h);
+  }
+  
+  boolean justClosed() {
+    if(justClosed) {
+      justClosed = false;
+      return true;
+    }
+    return false;
+  }
+  
+  void draw() {
+    float w = getWidth();
+    for(UIMomentary button: buttons) {
+      button.p.w = w;
+    }
+    if(!open) {
+      buttons.get(selected).draw();
+    } else {
+      for(UIMomentary button : buttons) button.draw();
+    }
+  }
+}
+
+class UISentence extends UIElement {
+  
+  ArrayList<Object> objects;
+
+  UISentence(PositionSpecifier p, String label, ColorScheme cs, String setString) {
+    super(p, label, cs);
+    setByString(setString);  }
+  
+  void setByString(String str) {
+    String[] sections = str.split("\\|");
+    objects = new ArrayList<Object>();
+    for(String sec : sections) {
+      if(sec.length() < 3) continue;
+      if(sec.charAt(0) == '@') {
+        sec = sec.substring(1,sec.length());
+        objects.add(new UIDropDown(p, sec, c, sec.split(": ")));
+      } else {
+        objects.add(sec);
+      }
+    }
+  }
+  
+  void draw() {
+    float x = p.x;
+    for(Object object : objects) {
+      if(object instanceof UIDropDown) {
+        ((UIDropDown)object).p.x = x;
+        ((UIDropDown)object).draw();
+        x += ((UIDropDown)object).getWidth();
+      } else if(object instanceof String) {
+        fill(LIGHT);
+        textAlign(LEFT);
+        text((String)object,x,p.center()[1] + c.fontSize/3);
+        x += textWidth((String)object);
+      }
+    }
+  }
+  
+  void update() {
+    for(Object object : objects) {
+      if(object instanceof UIElement) {
+        ((UIElement)object).update();
+      }
+    }
+  }
+  
+  PositionSpecifier updateC(PositionSpecifier p) {
+    for(Object object : objects) {
+      if(object instanceof UIDropDown) {
+        p = ((UIDropDown)object).updateC(p);
+      }
+    }
+    return p;
+  }
+  
+  String getValue() {
+    String str = "";
+    for(Object object : objects) {
+      if(object instanceof UIDropDown) {
+        str = String.join(" ", str, ((UIDropDown)object).getValue().replace(" ","_"));
+      }
+    }
+    return trim(str);
+  }
+  
+  boolean didChange() {
+    for(Object object : objects) {
+      if(object instanceof UIDropDown) {
+        if(((UIDropDown)object).justClosed()) return true;
+      }
+    } return false;
   }
 }

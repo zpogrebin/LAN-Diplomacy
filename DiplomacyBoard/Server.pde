@@ -97,6 +97,7 @@ class GameServer {
     
   void draw() {
     if(!gameInProgress) {
+      textFont(PLEXSANS);
       image(cover,0,0,515,768);
       if(loadNewGame) variantButton.draw();
       else saveSelectButton.draw();
