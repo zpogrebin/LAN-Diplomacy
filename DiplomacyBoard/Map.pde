@@ -401,6 +401,13 @@ class Board {
   
   void adjudicatePhase() {
     if(phase == Phases.MOVEPHASE) adjudicateMoves();
+    else if(phase == Phases.RETREAT) {
+      for(Order order: getAllOrders()) {
+        if(order.type == order.DISBANDSTR || order.type == order.RETREATSTR) {
+          order.execute();
+        }
+      }
+    }
   }
   
   void adjudicateMoves() {

@@ -65,7 +65,8 @@ class Unit {
   }
   
   void hardMove(Region to) {
-    if(location != null) location.setOccupier(null);
+    if(location != null && !dislodged) location.setOccupier(null);
+    else if(location != null) location.setDislodged(null);
     if(!to.isEmpty()) to.getOccupier().dislodge();
     location = to;
     to.setOccupier(this);

@@ -92,7 +92,7 @@ class Order {
     } else if(MOVEPOSSIBILITIES.contains(type)) {
       return makeButton(type, MOVEPOSSIBILITIES);
     } else if(FAILUREPOSSIBILITIES.contains(type)) {
-      if(getPossibleTargets().size() == 0) return makeButton(type, FAILUREPOSSIBILITIES);
+      if(getEmptyAdjacentRegions().size() == 0) return makeButton(type, DISBANDSTR);
       return makeButton(type, FAILUREPOSSIBILITIES);
     } else {
       return makeButton(type, BUILDPOSSIBILITES);
@@ -151,9 +151,9 @@ class Order {
   }
   
   ArrayList<Region> getEmptyAdjacentRegions() {
-    ArrayList<Region> moves = new ArrayList<Region>(getAdjacentRegions());
-    for(Region r: moves) {
-      if(!r.isEmpty()) moves.remove(r);
+    ArrayList<Region> moves = new ArrayList<Region>();
+    for(Region r: getAdjacentRegions()) {
+      if(r.isEmpty()) moves.add(r);
     }
     return moves;
   }
@@ -390,9 +390,17 @@ class SupportMove extends Order {
     return ret;
   }
   
+  void checkValidity() {
+    if(target == null || support == null) makeInvalid();
+    if(!getPossibleTargets().contains(target)) makeInvalid();
+    if(!getPossibleSupports().contains(support)) makeInvalid();
+    if(support.getOccupier().currOrder.type != MOVESTR) makeInvalid();
+    if(support.getOccupier().currOrder.target != target) makeInvalid();
+  }
+  
   void execute() {
+    checkValidity();
     if(failed || !valid) return;
-    if(target.isEmpty()) return;
     support.getOccupier().incrementStrength();
   }
   
@@ -440,7 +448,15 @@ class SupportHold extends Order {
     return getOrderTypes() + "the unit in" + makeButton(support, getPossibleSupports());
   }
   
+  void checkValidity() {
+    if(support == null) makeInvalid();
+    if(!getPossibleSupports().contains(support)) makeInvalid();
+    if(support.getOccupier().currOrder.type == MOVESTR) makeInvalid();
+    if(support.getOccupier().currOrder.type == SUPPORTHOLDSTR) makeInvalid(); //Is this true?
+  }
+  
   void execute() {
+    checkValidity();
     if(failed || !valid) return;
     if(target.isEmpty()) return;
     target.getOccupier().incrementStrength();
@@ -527,7 +543,9 @@ class Retreat extends Order {
   
   void execute() {
     if(failed || !valid) return;
+    unit.location.setDislodged(null);
     unit.hardMove(target);
+    unit.dislodged = false;
   }
 }
 
@@ -538,6 +556,16 @@ class Disband extends Order {
     targetRequired = true;
     supportRequired = false;
     type = DISBANDSTR;
+  }
+  
+  String orderHandler(String[] args) {
+    return getOrderTypes();
+  }
+  
+  void execute() {
+    unit.location.setDislodged(null);
+    if(unit.isFleet()) unit.owner.fleets.remove(unit);
+    if(unit.isArmy()) unit.owner.armies.remove(unit);
   }
 }
 
@@ -550,6 +578,17 @@ class Build extends Order {
     availablePhase = Phases.BUILD;
     this.target = target;
     this.type = type;
+    this.player = player;
+  }
+}
+
+class DisbandInPlace extends Order {
+  
+  Player player;
+  
+  DisbandInPlace(Player player, Region target) {
+    super(null);
+    this.target = target;
     this.player = player;
   }
 }

@@ -166,6 +166,15 @@ class Player {
   
   void defaultOrders(Phases phase) {
     for(Unit u: getAllUnits()) u.resetOrders(phase);
+    builds = new ArrayList<Order>();
+    if(theater.phase == Phases.BUILD) {
+      for(int i = this.getAllUnits().size(); i > numCenters) {
+        builds.add(new DisbandInPlace());
+      }
+      else if(this.getAllUnits().size() < numCenters) {
+        builds.add(new Build());
+      }
+    }
   }
   
   String getUpdatedData() {
