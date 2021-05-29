@@ -518,6 +518,17 @@ class Retreat extends Order {
   PShape render() {
     return renderArrow(location, target, retrColor);
   }
+  
+  String orderHandler(String[] args) {
+    if(args.length == 1) target = stringToRegion(args[0]);
+    else target = getPossibleTargets().get(0);
+    return getOrderTypes() + "into" + makeButton(target, getPossibleTargets());
+  }
+  
+  void execute() {
+    if(failed || !valid) return;
+    unit.hardMove(target);
+  }
 }
 
 class Disband extends Order {
@@ -526,6 +537,7 @@ class Disband extends Order {
     availablePhase = Phases.RETREAT;
     targetRequired = true;
     supportRequired = false;
+    type = DISBANDSTR;
   }
 }
 

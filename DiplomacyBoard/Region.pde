@@ -5,6 +5,7 @@ class Region {
   ArrayList<Region> landBorders;
   ArrayList<Region> seaBorders;
   protected Unit occupiedUnit;
+  protected Unit dislodgedUnit;
   Player owner;
   boolean canBeOwned;
   protected boolean canDraw;
@@ -54,7 +55,10 @@ class Region {
   
   void setOccupier(Unit newUnit) {
     this.occupiedUnit = newUnit;
-    
+  }
+  
+  void setDislodged(Unit newUnit) {
+    this.dislodgedUnit = newUnit;
   }
   
   float[] getPos(Unit u) {
@@ -125,6 +129,11 @@ class Region {
   Unit getOccupier() {
     if(parent != null) return parent.getOccupier();
     return occupiedUnit;
+  }
+  
+  Unit getDislodged() {
+    if(parent != null) return parent.getDislodged();
+    return dislodgedUnit;
   }
   
   boolean landLocked() {return seaBorders.size() == 0;}
@@ -208,6 +217,12 @@ class Coastal extends Region {
     else return southCoast.occupiedUnit;
   }
   
+  Unit getDislodged() {
+    if(occupiedUnit != null) return dislodgedUnit;
+    else if(northCoast.occupiedUnit != null) return northCoast.dislodgedUnit;
+    else return southCoast.dislodgedUnit;
+  }
+  
   void advanceOwnership() {
     if(isEmpty()) return;
     if(supplyCenter) {
@@ -223,5 +238,13 @@ class Coastal extends Region {
       southCoast.occupiedUnit=null;
       this.occupiedUnit=null;
     } else this.occupiedUnit = newUnit;
+  }
+  
+  void setDislodged(Unit newUnit) {
+    if(newUnit == null) {
+      northCoast.dislodgedUnit=null;
+      southCoast.dislodgedUnit=null;
+      this.dislodgedUnit=null;
+    } else this.dislodgedUnit = newUnit;
   }
 }

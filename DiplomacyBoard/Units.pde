@@ -22,8 +22,8 @@ class Unit {
     lastOrder = currOrder;
     if(phase == Phases.MOVEPHASE) {
       currOrder = new Hold(this);
-    } else if(phase == Phases.RETREAT && dislodged) {
-      currOrder = new Disband(this);
+    } else if(phase == Phases.RETREAT) {
+      if(dislodged) currOrder = new Disband(this);
     } else {
       currOrder = new Order(this);
     }
@@ -60,7 +60,8 @@ class Unit {
   
   void dislodge() {
     dislodged = true;
-    location.occupiedUnit = null;
+    location.setOccupier(null);
+    location.setDislodged(this);
   }
   
   void hardMove(Region to) {

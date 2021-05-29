@@ -373,7 +373,6 @@ class Board {
     if(phase != Phases.BUILD) {
       if(retreatsNecessary()) {
         phase = Phases.RETREAT;
-        return;
       } else if(!spring) {
         for(Region r : regions.values()) r.advanceOwnership();
         phase = Phases.BUILD;
@@ -392,6 +391,11 @@ class Board {
   }
 
   boolean retreatsNecessary() {
+    for(Player p: players.values()) {
+      for(Unit u: p.getAllUnits()) {
+        if(u.dislodged) return true;
+      }
+    }
     return false;
   }
   

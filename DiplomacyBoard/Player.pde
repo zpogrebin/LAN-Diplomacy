@@ -112,7 +112,9 @@ class Player {
     String[] args = partialOrder.split("\\s+");
     Region location = stringToRegion(args[0]);
     if(location == null) return "Error: Invalid location " + args[0];
-    Unit u = location.getOccupier();
+    Unit u;
+    if(theater.phase == Phases.MOVEPHASE) u = location.getOccupier();
+    else u = location.getDislodged();
     if(u == null || u.owner != this) return "Error: No available units here!";
     if(u.currOrder.convert(args[1]) != null) {
        u.currOrder = u.currOrder.convert(args[1]);
@@ -126,9 +128,14 @@ class Player {
   String getAllOrders() {
     ArrayList<String> response = new ArrayList<String>();
     response.add("clearorders, now; ");
-    for(Unit u: armies) response.add(orderHandler(u.currOrder.getStatus()));
-    for(Unit u: fleets){
-      response.add(orderHandler(u.currOrder.getStatus()));
+    if(theater.phase != Phases.BUILD) {
+      for(Unit u: getAllUnits()) {
+        if(theater.phase == Phases.MOVEPHASE || u.dislodged) {
+          response.add(orderHandler(u.currOrder.getStatus()));
+        }
+      }
+    } else {
+      ;
     }
     return String.join("", response);
   }
@@ -150,10 +157,7 @@ class Player {
   PShape renderOrders() {
     PShape s = createShape(GROUP);
     PShape i;
-    for(Unit u: armies) {
-      i = u.currOrder.render();
-      s.addChild(i);
-    } for(Unit u: fleets) {
+    for(Unit u: getAllUnits()) {
       i = u.currOrder.render();
       s.addChild(i);
     }
@@ -161,11 +165,7 @@ class Player {
   }
   
   void defaultOrders(Phases phase) {
-    for(Unit u: armies) {
-      u.resetOrders(phase);
-    } for(Unit u: fleets) {
-      u.resetOrders(phase);
-    }
+    for(Unit u: getAllUnits()) u.resetOrders(phase);
   }
   
   String getUpdatedData() {
@@ -178,8 +178,14 @@ class Player {
   ArrayList<Order> getAllOrders(Phases phase) {
     if(phase == Phases.BUILD) return builds;
     ArrayList<Order> ret = new ArrayList<Order>();
-    for(Unit u: armies) ret.add(u.currOrder);
-    for(Unit u: fleets) ret.add(u.currOrder);
+    for(Unit u: getAllUnits()) ret.add(u.currOrder);
+    return ret;
+  }
+  
+  ArrayList<Unit> getAllUnits() {
+    ArrayList<Unit> ret = new ArrayList<Unit>();
+    ret.addAll(armies);
+    ret.addAll(fleets);
     return ret;
   }
 }
