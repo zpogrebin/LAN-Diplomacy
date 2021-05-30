@@ -10,6 +10,9 @@ class GameClient {
   Mode mode;
   Client c;
   PApplet applet;
+  int lastUpdate;
+  final int updateFrequency = 20000;
+  Timer timer;
   
   //UI Elements
   PositionSpecifier activeP = null;
@@ -20,12 +23,12 @@ class GameClient {
   ColorScheme col;
   HashMap<String, OrderDevice> orders;
   
+  //Data
   String countryName;
   String numCenters;
   color countryColor;
   String phase;
   
-  OrderDevice od;
   
   GameClient(PApplet applet) {
     setupUI();
@@ -36,6 +39,7 @@ class GameClient {
     countryColor = #ffffff;
     phase = "";
     orders = new HashMap<String, OrderDevice>();
+    timer = new Timer(10000);
   }
   
   void setupUI() {
@@ -59,7 +63,7 @@ class GameClient {
     }
     println("joining with " + passphrase.getValue());
     if(isErrorResponse(sendCommand("join", passphrase.getValue()))) return;
-    updateBaseWindow();
+    updateBaseWindow(true);
   }
   
   String sendCommand(String command, String[] args, boolean quick) {
@@ -88,12 +92,13 @@ class GameClient {
     return false;
   }
   
-  void updateBaseWindow() {
+  void updateBaseWindow(boolean updateOrders) {
+    lastUpdate = millis();
     if(!c.active()) mode = Mode.START;
     String data = sendCommand("update", passphrase.getValue());
     if(!isErrorResponse(data)) mode = Mode.MOVES;
     parseCommands(data);
-    parseCommands(sendCommand("orders", passphrase.getValue()));
+    if(updateOrders) parseCommands(sendCommand("orders", new String[]{passphrase.getValue()}, true));
   }
   
   void parseCommands(String unparsed) {
@@ -117,6 +122,13 @@ class GameClient {
     else if(v[0].equals("order")) updateOrderList(v[1], v[2], v[3]);
     else if(v[0].equals("clearorders")) resetOrders();
     else if(v[0].equals("date")) phase = v[1];
+    else if(v[0].equals("time")) updateTime(v[1]);
+  }
+  
+  void updateTime(String s) {
+    timer.setByString(s);
+    timer.stop();
+    timer.start();
   }
   
   void resetOrders() {
@@ -124,8 +136,8 @@ class GameClient {
   }
   
   void updateOrderList(String location, String name, String command) {
-    if(orders.containsKey(name)) orders.get(name).refreshOrder(command);
-    else orders.put(name, new OrderDevice(orders.size(), name, location, command, this, col)); 
+    if(orders.containsKey(location)) orders.get(location).refreshOrder(command);
+    else orders.put(location, new OrderDevice(orders.size(), name, location, command, this, col)); 
   }
   
   void draw() {
@@ -140,6 +152,7 @@ class GameClient {
     } else if(mode == Mode.MOVES) {
       drawHeading();
       for(Map.Entry<String, OrderDevice> od : orders.entrySet()) od.getValue().draw();
+      for(Map.Entry<String, OrderDevice> od : orders.entrySet()) od.getValue().drawTop();
     }
   }
   
@@ -152,16 +165,20 @@ class GameClient {
     textAlign(LEFT,BASELINE);
     textFont(FUTURA);
     textSize(50);
-    text(countryName,50,70);
+    text(countryName,25,70);
     stroke(LIGHT);
     strokeWeight(2);
     line(0,100,width,100);
     strokeWeight(1);
     line(0,150,width,150);
-    textFont(PLEXSERIFBOLDITA);
+    textFont(PLEXSERIFBOLD);
     textSize(20);
     textAlign(LEFT,CENTER);
-    text(phase, 50, 125);
+    text(phase, 25, 122);
+    textFont(PLEXMONOBOLD);
+    textAlign(RIGHT,CENTER);
+    textSize(20);
+    text(timer.getColonSeparated(2), width - 25, 122);
   }
   
   void keyPressed(char k) {
@@ -179,9 +196,14 @@ class GameClient {
       passphrase.update();
       if(start.getValue()) joinGame();
     } else {
+      if(millis() - updateFrequency > lastUpdate) updateBaseWindow(false);
       if(c.available() > 0) parseCommands(c.readString());
       for(Map.Entry<String, OrderDevice> od : orders.entrySet()) {
         activeP = od.getValue().updateC(activeP);
+      }
+      if(timer.update()) {
+        delay(20);
+        updateBaseWindow(true);
       }
     }
   }

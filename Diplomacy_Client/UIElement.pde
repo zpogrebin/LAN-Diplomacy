@@ -535,6 +535,11 @@ class UIDropDown extends UIElement {
       for(UIMomentary button : buttons) button.draw();
     }
   }
+  
+  void drawTop() {
+    if(!open) return;
+    for(UIMomentary button : buttons) button.draw();
+  }
 }
 
 class UISentence extends UIElement {
@@ -549,7 +554,7 @@ class UISentence extends UIElement {
     String[] sections = str.split("\\|");
     objects = new ArrayList<Object>();
     for(String sec : sections) {
-      if(sec.length() < 3) continue;
+      if(sec.length() < 2) continue;
       if(sec.charAt(0) == '@') {
         sec = sec.substring(1,sec.length());
         objects.add(new UIDropDown(p, sec, c, sec.split(": ")));
@@ -571,6 +576,15 @@ class UISentence extends UIElement {
         textAlign(LEFT);
         text((String)object,x,p.center()[1] + c.fontSize/3);
         x += textWidth((String)object);
+      }
+      x += textWidth(" ");
+    }
+  }
+  
+  void drawTop() {
+    for(Object object : objects) {
+      if(object instanceof UIDropDown) {
+        ((UIDropDown)object).drawTop();
       }
     }
   }
