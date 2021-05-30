@@ -609,14 +609,14 @@ class Build extends Order {
     if(args.length < 2) unitType = "Army";
     else if(!args[0].equals(regionToString(target))) {
       unitType = "Army";
-    } else unitType = args[2];
+    } else unitType = args[1];
     ret += makeButton(target, getPossibleTargets());
     ret += "an" + getPossibleTypes();
     return ret;
   }
   
   void execute() {
-    if(unitType == "Fleet") player.createFleet(target, -1);
+    if(unitType.equals("Fleet")) player.createFleet(target, -1);
     else player.createArmy(target, -1);
     target.getOccupier().lastOrder = this;
     target.getOccupier().currOrder = this;
@@ -651,6 +651,11 @@ class DisbandInPlace extends Order {
       if(u.currOrder.type != DISBANDSTR) locations.add(u.location);
     }
     return locations;
+  }
+  
+  PShape render() {
+    println("returning null render @ " + unit.getInfo());
+    return createShape();
   }
 }
 

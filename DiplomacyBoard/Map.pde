@@ -371,6 +371,7 @@ class Board {
     println("Advancing game");
     adjudicatePhase();
     println("adjudication done");
+    updateRender();
     if(phase != Phases.BUILD) {
       if(retreatsNecessary()) {
         phase = Phases.RETREAT;
@@ -385,7 +386,6 @@ class Board {
       year += 1;
       phase = Phases.MOVEPHASE;
     }
-    updateRender();
     defaultOrders(phase);
     if(phase == Phases.MOVEPHASE) moveTime.start();
     else auxTime.start();

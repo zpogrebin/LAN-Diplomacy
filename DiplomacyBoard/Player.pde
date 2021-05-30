@@ -133,9 +133,9 @@ class Player {
     //Args[NUM, TYPE, TARGET]
     int i = Integer.valueOf(args[0]);
     Order b = builds.get(i);
-    if(b.type != args[1]) {
-      if(args[1] == b.DISBANDSTR) builds.set(i, new DisbandInPlace(this, null, i));
-      else if(args[1] == b.NOTHINGSTR) builds.set(i, new Nothing(this, i));
+    if(!b.type.equals(args[1])) {
+      if(args[1].equals(b.DISBANDSTR)) builds.set(i, new DisbandInPlace(this, null, i));
+      else if(args[1].equals(b.NOTHINGSTR)) builds.set(i, new Nothing(this, i));
       else builds.set(i, new Build(this, null, "Army", i));
       args = new String[]{"", ""};
     }
@@ -178,6 +178,7 @@ class Player {
   PShape renderOrders() {
     PShape s = createShape(GROUP);
     PShape i;
+    if(theater.phase == Phases.BUILD) return s;
     for(Unit u: getAllUnits()) {
       i = u.currOrder.render();
       s.addChild(i);
