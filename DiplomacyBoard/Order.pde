@@ -599,7 +599,12 @@ class Build extends Order {
   }
   
   ArrayList<Region> getPossibleTargets() {
-    return player.getAvailableHomeCenters();
+    ArrayList<Region> ret = player.getAvailableHomeCenters();
+    for(Order o: player.builds) {
+      if(o == this) continue;
+      if(o.type.equals(type)) ret.remove(o.target);
+    }
+    return ret;
   }
   
   String orderHandler(String[] args) {
@@ -651,6 +656,14 @@ class DisbandInPlace extends Order {
       if(u.currOrder.type != DISBANDSTR) locations.add(u.location);
     }
     return locations;
+  }
+  
+  String orderHandler(String[] args) {
+    String ret = "|@Disband: Disband| the unit in";
+    if(args.length < 1) target = getPossibleTargets().get(0);
+    else target = stringToRegion(args[0]);
+    ret += makeButton(target, getPossibleTargets());
+    return ret;
   }
   
   PShape render() {
