@@ -46,7 +46,7 @@ class Order {
     this.unit = unit;
     failed = false;
     strength = 1;
-    this.location = unit.location;
+    if(unit != null) this.location = unit.location;
     this.type = NOTHINGSTR;
   }
   
@@ -69,7 +69,6 @@ class Order {
     if(toCode.equals(CONVOYSTR)) return new Convoy(unit, null, null);
     if(toCode.equals(RETREATSTR)) return new Retreat(unit, null);
     if(toCode.equals(DISBANDSTR)) return new Disband(unit);
-    if(toCode.equals(BUILDSTR)) return new Build(null, null, "Army");
     else return new Order(unit);
   }
   
@@ -570,25 +569,110 @@ class Disband extends Order {
 }
 
 class Build extends Order {
-  String type;
+  String unitType;
   Player player;
+  int id;
   
-  Build(Player player, Region target, String type) {
+  Build(Player player, Region target, String type, int id) {
     super(null);
     availablePhase = Phases.BUILD;
     this.target = target;
-    this.type = type;
+    this.unitType = type;
+    this.type = BUILDSTR;
     this.player = player;
+    this.id = id;
+  }
+  
+  String getStatus() {
+    String response = Integer.toString(id) + " " + type;
+    response += " " + regionToString(target);
+    response += " " + unitType;
+    return response;
+  }
+  
+  String getPossibleTypes() {
+    if(target == null || target.seaBorders.size() == 0) {
+      return "|@" + unitType + ": Army|";
+    } else {
+      return "|@" + unitType + ": Army: Fleet|";
+    }
+  }
+  
+  ArrayList<Region> getPossibleTargets() {
+    return player.getAvailableHomeCenters();
+  }
+  
+  String orderHandler(String[] args) {
+    String ret = getOrderTypes() + "in";
+    if(args.length < 1) target = getPossibleTargets().get(0);
+    else target = stringToRegion(args[0]);
+    if(args.length < 2) unitType = "Army";
+    else if(!args[0].equals(regionToString(target))) {
+      unitType = "Army";
+    } else unitType = args[2];
+    ret += makeButton(target, getPossibleTargets());
+    ret += "an" + getPossibleTypes();
+    return ret;
+  }
+  
+  void execute() {
+    if(unitType == "Fleet") player.createFleet(target, -1);
+    else player.createArmy(target, -1);
+    target.getOccupier().lastOrder = this;
+    target.getOccupier().currOrder = this;
   }
 }
 
 class DisbandInPlace extends Order {
   
   Player player;
+  int id;
   
-  DisbandInPlace(Player player, Region target) {
+  DisbandInPlace(Player player, Region target, int id) {
     super(null);
     this.target = target;
     this.player = player;
+    this.type = DISBANDSTR;
+    this.id = id;
+  }
+  
+  String getStatus() {
+    String response = Integer.toString(id) + " " + type;
+    response += " " + regionToString(target);
+    return response;
+  }
+  
+  ArrayList<Region> getPossibleTargets() {
+    ArrayList<Region> locations = new ArrayList<Region>();
+    ArrayList<Unit> units = new ArrayList<Unit>();
+    units.addAll(player.armies);
+    units.addAll(player.fleets);
+    for(Unit u: units) {
+      if(u.currOrder.type != DISBANDSTR) locations.add(u.location);
+    }
+    return locations;
+  }
+}
+
+class Nothing extends Order {
+  
+  int id;
+  Player player;
+  
+  Nothing(Player player, int id) {
+    super(null);
+    this.player = player;
+    this.id = id;
+    this.type = NOTHINGSTR;
+  }
+  
+  String getStatus() {
+    String response = Integer.toString(id) + " " + type;
+    response += " " + regionToString(target);
+    return response;
+  }
+  
+  String orderHandler(String[] args) {
+    return getOrderTypes();
   }
 }

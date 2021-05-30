@@ -129,7 +129,7 @@ class Board {
         else if(cmds[0].equals("sea")) newRegion(cmds, midGame);
         else if(cmds[0].equals("land")) newRegion(cmds, midGame);
         else if(cmds[0].equals("coastal")) newRegion(cmds, midGame);
-        else if(cmds[0].equals("mode") && cmds[1].equals("init")) midGame = false;
+        else if(cmds[0].equals("init")) midGame = false;
         else if(cmds[0].equals("connect")) connectRegions(cmds);
         else if(cmds[0].equals("cncoast")) connectCoast(cmds);
         else if(cmds[0].equals("pos")) positionCommand(cmds);
@@ -208,7 +208,8 @@ class Board {
     Region r = getRegion(args[1]);
     r.owner = players.get(args[2]);
     if(r.supplyCenter) r.owner.incrementCenters(true);
-    if(!mid) r.owner.homeCenters.add(r);
+    if(!mid && r.supplyCenter) r.owner.homeCenters.add(r);
+    println("HELLO");
   }
   
   private void connectRegions(String[] args) {
@@ -405,6 +406,12 @@ class Board {
       for(Order order: getAllOrders()) {
         if(order.type == order.DISBANDSTR || order.type == order.RETREATSTR) {
           order.execute();
+        }
+      }
+    } else if(phase == Phases.BUILD) {
+      for(Player p : players.values()) {
+        for(Order o : p.builds) {
+          o.execute();
         }
       }
     }

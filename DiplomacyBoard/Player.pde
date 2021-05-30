@@ -110,18 +110,37 @@ class Player {
   //Handle Order Parsing
   String orderHandler(String partialOrder) {
     String[] args = partialOrder.split("\\s+");
-    Region location = stringToRegion(args[0]);
-    if(location == null) return "Error: Invalid location " + args[0];
-    Unit u;
-    if(theater.phase == Phases.MOVEPHASE) u = location.getOccupier();
-    else u = location.getDislodged();
-    if(u == null || u.owner != this) return "Error: No available units here!";
-    if(u.currOrder.convert(args[1]) != null) {
-       u.currOrder = u.currOrder.convert(args[1]);
-       args = new String[]{"",""};
+    if(theater.phase != Phases.BUILD) {
+      Region location = stringToRegion(args[0]);
+      if(location == null) return "Error: Invalid location " + args[0];
+      Unit u;
+      if(theater.phase == Phases.MOVEPHASE) u = location.getOccupier();
+      else u = location.getDislodged();
+      if(u == null || u.owner != this) return "Error: No available units here!";
+      if(u.currOrder.convert(args[1]) != null) {
+         u.currOrder = u.currOrder.convert(args[1]);
+         args = new String[]{"",""};
+      }
+      String response = u.currOrder.orderHandler(Arrays.copyOfRange(args, 2, args.length));
+      response = String.join(", ", "order", regionToString(u.location), u.getName(), response) + "; ";
+      return response;
+    } else {
+      return buildHandler(args);
     }
-    String response = u.currOrder.orderHandler(Arrays.copyOfRange(args, 2, args.length));
-    response = String.join(", ", "order", regionToString(u.location), u.getName(), response) + "; ";
+  }
+  
+  String buildHandler(String[] args) {
+    //Args[NUM, TYPE, TARGET]
+    int i = Integer.valueOf(args[0]);
+    Order b = builds.get(i);
+    if(b.type != args[1]) {
+      if(args[1] == b.DISBANDSTR) builds.set(i, new DisbandInPlace(this, null, i));
+      else if(args[1] == b.NOTHINGSTR) builds.set(i, new Nothing(this, i));
+      else builds.set(i, new Build(this, null, "Army", i));
+      args = new String[]{"", ""};
+    }
+    String response = builds.get(i).orderHandler(Arrays.copyOfRange(args, 2, args.length));
+    response = String.join(", ", "order", String.valueOf(i), "Action Needed", response) + "; ";
     return response;
   }
   
@@ -135,7 +154,9 @@ class Player {
         }
       }
     } else {
-      ;
+      for(Order o: builds) {
+        response.add(orderHandler(o.getStatus()));
+      }
     }
     return String.join("", response);
   }
@@ -168,11 +189,11 @@ class Player {
     for(Unit u: getAllUnits()) u.resetOrders(phase);
     builds = new ArrayList<Order>();
     if(theater.phase == Phases.BUILD) {
-      for(int i = this.getAllUnits().size(); i > numCenters) {
-        builds.add(new DisbandInPlace());
+      for(int i = this.getAllUnits().size(); i > numCenters; i--) {
+        builds.add(new DisbandInPlace(this, this.getAllUnits().get(0).location, builds.size()));
       }
-      else if(this.getAllUnits().size() < numCenters) {
-        builds.add(new Build());
+      for(int i = this.getAllUnits().size(); i < numCenters; i++) {
+        builds.add(new Nothing(null, builds.size()));
       }
     }
   }
