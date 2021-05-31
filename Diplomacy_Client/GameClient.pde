@@ -49,6 +49,10 @@ class GameClient {
     passphrase = new UITextBox(p, "passphrase", col, "");
     p.set_coords(250, 150, 90, 40);
     start = new UIMomentary(p, "Join", col);
+    start.setNext(ipAddress);
+    ipAddress.setNext(port);
+    port.setNext(passphrase);
+    passphrase.setNext(start);
   }
   
   void joinGame() {
@@ -168,6 +172,8 @@ class GameClient {
     if(mode == Mode.START) {
       passphrase.keyPressed(k);
       ipAddress.keyPressed(k);
+      start.keyPressed(k);
+      port.keyPressed(k);
     }
   }
   

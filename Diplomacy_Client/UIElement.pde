@@ -3,6 +3,9 @@ class UIElement {
   protected PositionSpecifier p;
   protected String label;
   protected ColorScheme c;
+  UIElement next;
+  boolean active;
+  boolean justActivated;
   
   UIElement(PositionSpecifier ip, String ilabel, ColorScheme ic) {
     p = new PositionSpecifier (ip);
@@ -10,12 +13,35 @@ class UIElement {
     c = ic;
   }
   
+  void setNext(UIElement next) {
+    this.next = next;
+  }
+  
+  void keyPressed(char k) {
+    if(active && !justActivated && k == TAB) activateNext();
+  }
+  
+  void activateNext() {
+    if(next != null) next.activate();
+    this.deactivate();
+  }
+  
   void draw() {
     ;
   }
   
+  void activate() {
+    this.active = true;
+    this.justActivated = true;
+  }
+  
+  void deactivate() {
+    this.active = false;
+    this.justActivated = true;
+  }
+  
   void update() {
-    ;
+    justActivated = false;
   }
   
   String getStr() {
@@ -80,6 +106,7 @@ class UIButton extends UIElement {
   }
   
   void update() {  
+    justActivated = false;
     if(p.mouseOver()) hover = true;
     else hover = false;
     if(mousePressed && p.mouseOver()) {
@@ -88,6 +115,12 @@ class UIButton extends UIElement {
         mouseclicking = true;
       }
     } else mouseclicking = false;
+  }
+  
+  void keyPressed(char k) {
+    if(!active) return;
+    if(k == TAB && !justActivated) activateNext();
+    else if(k == ' ') setValue(!getValue());
   }
 }
 
@@ -109,7 +142,12 @@ class UIMomentary extends UIButton {
       fill(c.clickedtext);
       text(label, p.center()[0], p.center()[1] + c.fontSize/3);
     } else super.draw();
-    
+  }
+  
+  void keyPressed(char k) {
+    if(!active) return;
+    if(k == TAB && !justActivated) activateNext();
+    else if(k == ' ') setValue(true);
   }
 }
 
@@ -127,6 +165,7 @@ class UIBaseToggle extends UIElement {
   }
   
   void update() {
+    justActivated = false;
     buttons[curr_button].setValue(true);
     for(UIButton i : buttons) i.update();
     for(int i = 0; i < buttons.length; i++) {
@@ -135,6 +174,13 @@ class UIBaseToggle extends UIElement {
         curr_button = i;
       }
     }
+  }
+  
+  void keyPressed(char k) {
+    if(!active) return;
+    if(k == TAB && !justActivated) activateNext();
+    else if(k == ' ') setIndex(getIndex() + 1);
+    else if(k - 30 >= 0 && k - 30 < 40) setIndex(Integer.valueOf(k));
   }
   
   String getValue() {
@@ -147,7 +193,7 @@ class UIBaseToggle extends UIElement {
   
   void setIndex(int i) {
     buttons[curr_button].setValue(false);
-    curr_button = i;
+    curr_button = i % buttons.length;
     buttons[i].setValue(true);
   }
 }
@@ -205,7 +251,6 @@ class UIToggleV extends UIBaseToggle {
 class UITextBox extends UIElement {
   protected String value;
   protected String curr_value;
-  protected boolean typing;
   protected String def_value;
   protected char lastkey = '\0';
   protected ColorScheme tbcs;
@@ -219,7 +264,7 @@ class UITextBox extends UIElement {
   
   UITextBox(PositionSpecifier ip, String ilabel, ColorScheme ic, String def) {
     super(ip, ilabel, ic);
-    typing = false;
+    active = false;
     value = "";
     def_value = def;
     curr_value = value;
@@ -256,7 +301,7 @@ class UITextBox extends UIElement {
     button.draw();
     noStroke();
     String disp_text;
-    if(typing) {
+    if(active) {
       p.makeRect(color(0,1), c.unclicked);
       fill(c.clickedtext);
       drawCursor();
@@ -300,32 +345,37 @@ class UITextBox extends UIElement {
   }
   
   protected void startTyping() {
-    typing = true;
+    active = true;
     curr_value = value;
+    button.setValue(true);
   }
   
   protected void stopTyping() {
-    typing = false;
+    active = false;
     value = curr_value;
+    button.setValue(false);
   }
   
+  void activate() {startTyping();}
+  void deactivate() {stopTyping();}
+  
   void update() {
-    if(key_handled) text("REPT", 300, 360);
-    else text("NO", 300, 360);
+    justActivated = false;
     button.update();
-    if(button.getValue() && !typing) startTyping();
-    if(typing) {
+    if(button.getValue() && !active) startTyping();
+    if(active) {
       if(mousePressed && !p.mouseOver()) stopTyping();
     }
-    button.setValue(typing);
+    button.setValue(active);
   }
   
   void keyPressed(char k) {
-    if(k == 0 || !typing) return;
-    if(k == ENTER || k == RETURN) {
+    if(!active) return;
+    if(k == TAB && !justActivated) activateNext();
+    else if(k == ENTER || k == RETURN) {
       stopTyping();
     } else if(k == ESC) {
-      typing = false;
+      active = false;
     } else if (k == CODED) {
       return;
     } else if(k == DELETE || k == BACKSPACE) {
@@ -395,6 +445,7 @@ class UIIncrementBox extends UIElement {
   }
   
   void update() {
+    justActivated = false;
     text_box.update();
     try {
       value = Float.parseFloat(text_box.getValue());
@@ -407,7 +458,18 @@ class UIIncrementBox extends UIElement {
     text_box.setValue(nf(value, 0, 0));
   }
   
+  void activate() {
+    this.active = true;
+    text_box.activate();
+  }
+  
+  void deactivate() {
+    this.active = false;
+    text_box.deactivate();
+  }
+  
   void keyPressed(char k) {
+    if(!active || justActivated) return;
     text_box.keyPressed(k);
   }
 }
@@ -484,6 +546,7 @@ class UIDropDown extends UIElement {
   }
   
   void update() {
+    justActivated = false;
     if(!open) {
       buttons.get(selected).p = p;
       buttons.get(selected).update();
@@ -576,6 +639,7 @@ class UISentence extends UIElement {
   }
   
   void update() {
+    justActivated = false;
     for(Object object : objects) {
       if(object instanceof UIElement) {
         ((UIElement)object).update();
