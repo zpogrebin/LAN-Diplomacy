@@ -35,7 +35,7 @@ class OrderDevice {
     orders.update();
     if(orders.didChange()) {
       String args[] = new String[] {c.passphrase.getValue(), location.replace(" ", "_") + " " + orders.getValue()};
-      c.sendCommand("order", args, true); //<>// //<>// //<>// //<>//
+      c.sendCommand("order", args, true); //<>// //<>// //<>// //<>// //<>// //<>//
     }
   }
   

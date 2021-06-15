@@ -93,7 +93,7 @@ class UIButton extends UIElement {
     if(value) {
       p.makeRect(c.clicked);
       fill(c.clickedtext);
-    } else if(hover) {
+    } else if(hover || active) {
       p.makeRect(c.highlight);
       fill(c.text);
     } else {
@@ -356,8 +356,14 @@ class UITextBox extends UIElement {
     button.setValue(false);
   }
   
-  void activate() {startTyping();}
-  void deactivate() {stopTyping();}
+  void activate() {
+    startTyping();
+    this.justActivated = true;
+  }
+  
+  void deactivate() {
+    stopTyping();
+  }
   
   void update() {
     justActivated = false;
@@ -458,19 +464,23 @@ class UIIncrementBox extends UIElement {
     text_box.setValue(nf(value, 0, 0));
   }
   
+  void setNext(UIElement next) {
+    this.next = next;
+    text_box.setNext(next);
+  }
+  
   void activate() {
-    this.active = true;
     text_box.activate();
   }
   
   void deactivate() {
-    this.active = false;
     text_box.deactivate();
   }
   
   void keyPressed(char k) {
-    if(!active || justActivated) return;
     text_box.keyPressed(k);
+    if(!active || justActivated) return;
+    if(key == TAB) activateNext();
   }
 }
 
