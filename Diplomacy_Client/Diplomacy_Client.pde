@@ -21,5 +21,5 @@ void draw() {
 void keyPressed() {
   gc.keyPressed(key);
   if(key == CODED && keyCode == LEFT) gc.mode = Mode.START;
-  if(key == CODED && keyCode == RIGHT) gc.updateBaseWindow();
+  if(key == CODED && keyCode == RIGHT) gc.updateBaseWindow(true);
 }

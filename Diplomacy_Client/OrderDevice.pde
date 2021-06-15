@@ -13,7 +13,7 @@ class OrderDevice {
     this.unitName = uName;
     this.location = loc;
     this.c = c;
-    PositionSpecifier p = new PositionSpecifier(50, start + (h*yNum) + h-40, 0, 30);
+    PositionSpecifier p = new PositionSpecifier(25, start + (h*yNum) + h-40, 0, 30);
     this.orders = new UISentence(p, "orders", cs, ord);
   }
   
@@ -26,9 +26,14 @@ class OrderDevice {
     textFont(PLEXSANSBOLD);
     textAlign(LEFT, TOP);
     textSize(20);
-    text(unitName + " at " + location,50,start + (h*yNum)+10);
+    if(location.length() >= 3) text(unitName + " at " + location,25,start + (h*yNum)+10);
+    else text("Action Required!",25,start + (h*yNum)+10);
     textFont(PLEXMONO);
     orders.draw();
+  }
+  
+  void drawTop() {
+    orders.drawTop();
   }
   
   void update() {
