@@ -1,9 +1,22 @@
+//    __             ___  _      __                        
+//   / /  ___ ____  / _ \(_)__  / /__  __ _  ___ _______ __
+//  / /__/ _ `/ _ \/ // / / _ \/ / _ \/  ' \/ _ `/ __/ // /
+// /____/\_,_/_//_/____/_/ .__/_/\___/_/_/_/\_,_/\__/\_, / 
+//                      /_/                         /___/  
+// Lan Diplomacy Development File
+// Sep 13, 2021
+
+// Contains the Board class, which includes 
+
 import java.util.Map;
 import java.util.Arrays;
 import java.util.Collections;
 
+// Enum for game phases
 enum Phases {MOVEPHASE, BUILD, RETREAT};
 
+// Board class, contains all graphical, file loading/saving, and is a wrapper 
+// Class for the entire game except the the server functionality
 class Board {
   
   HashMap<String, Region> regions;
@@ -19,6 +32,11 @@ class Board {
   Timer moveTime;
   boolean paused;
 
+  // Constructor
+  // Inputs: String variant, the name of the game variant
+  //         String saveFile, the save file to load from
+  //         Timer moveTime, the time for a single move to occur
+  //         Timer auxTime, the time for retreats, builds, etc to occur
   Board(String variant, String saveFile, Timer moveTime, Timer auxTime) {
     paused = false;
     regions = new HashMap<String, Region>();
@@ -36,6 +54,9 @@ class Board {
     }
   }
   
+  // Constructor to create new game from scratch with default settings (may not)
+  // work!
+  // Inputs: 
   Board(String variant) {
     this(variant, null, null, null);
   }
@@ -55,12 +76,16 @@ class Board {
       else if(passphrase.equals(p.abrName)) {
         println("HARD JOIN");
         return p;
-      } //TODO: REMOVE LATER
+      } //TODO: REMOVE LATER, code allows players to join as a known country
     }
     return null;
   }
 
-  //GRAPHICS FUNCTIONS
+/**********************
+ * GRAPHICS FUNCTIONS *
+ **********************/
+
+  // Game Draw Loop
   void draw() {
     shapeMode(CORNER);
     shape(render);
@@ -71,6 +96,7 @@ class Board {
     else text(auxTime.getColonSeparated(2), 50, h-20);
   }
   
+  // Game Update Loop
   void update() {
     if(!paused) {
       boolean next = false;
@@ -80,10 +106,13 @@ class Board {
     }
   }
   
+  // Updates the map's render status
   void updateRender() {
     render = getMapRender(null);
   }
   
+  // Helper function to render the basic map
+  // Output: PShape Basic map
   PShape getBaseRender() {
     PShape rend = createShape(GROUP);
     PShape subRender;
@@ -95,7 +124,10 @@ class Board {
     }
     return rend;
   }
-    
+  
+  // Gets a given player's map view
+  // Inputs: Player p: the player to get their info, if null, get up to date info
+  // Output: PShape, the full map, which can be shown
   PShape getMapRender(Player p) {
     PShape rend = createShape(GROUP);
     PShape subRender;
@@ -115,7 +147,12 @@ class Board {
     return rend;
   }
   
-  //FILE HANDLING COMMANDS
+/**************************
+ * FILE HANDLING COMMANDS *
+ **************************/
+  
+  // Loads a game from its file. Includes command parser
+  // Inputs: String filename -- //TODO CONTINUE HERE
   void loadFromFile(String filename, String variant) {
     boolean midGame = true;
     String lines[] = loadStrings(filename);

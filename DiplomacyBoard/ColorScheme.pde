@@ -1,3 +1,13 @@
+//    __             ___  _      __                        
+//   / /  ___ ____  / _ \(_)__  / /__  __ _  ___ _______ __
+//  / /__/ _ `/ _ \/ // / / _ \/ / _ \/  ' \/ _ `/ __/ // /
+// /____/\_,_/_//_/____/_/ .__/_/\___/_/_/_/\_,_/\__/\_, / 
+//                      /_/                         /___/  
+// Lan Diplomacy Development File
+// Sep 13, 2021
+
+// Container class for the color scheme of UI Buttons. Contains colors for the 
+// UI Element background text for various states.
 class ColorScheme {
   color unclicked;
   color highlight;

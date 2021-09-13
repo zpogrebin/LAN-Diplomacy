@@ -1,3 +1,11 @@
+//    __             ___  _      __                        
+//   / /  ___ ____  / _ \(_)__  / /__  __ _  ___ _______ __
+//  / /__/ _ `/ _ \/ // / / _ \/ / _ \/  ' \/ _ `/ __/ // /
+// /____/\_,_/_//_/____/_/ .__/_/\___/_/_/_/\_,_/\__/\_, / 
+//                      /_/                         /___/  
+// Lan Diplomacy Development File
+// Sep 13, 2021
+
 final color LIGHT = #FAF5C7;
 final color RED = #F74D33;
 final color BLUE = #1D3C72;
@@ -16,7 +24,8 @@ PFont PLEXSERIFBOLD;
 PFont PLEXSERIFBOLDITA;
 PFont FUTURA;
 
-
+// Sets up fonts within processing.
+// Effect: Initializes PFont objects with all desired fonts
 void setupFonts() {
   PLEXSANS = createFont(dataPath("fonts/plexsansttf/IBMPlexSans-Regular.ttf"), 12);
   PLEXSANSBOLD = createFont(dataPath("fonts/plexsansttf/IBMPlexSans-Bold.ttf"), 12);

@@ -45,8 +45,8 @@ class GameClient {
   void setupUI() {
     col = new ColorScheme(LIGHT, RED, DARKLIGHT, BLACK, BLACK, 12);
     PositionSpecifier p = new PositionSpecifier(50,50,140,40,0);
-    ipAddress = new UITextBox(p, "IP", col, "192.168.0.14");
-    ipAddress.setValue("192.168.0.14");
+    ipAddress = new UITextBox(p, "IP", col, "192.168.0.2");
+    ipAddress.setValue("192.168.0.2");
     p.set_coords(200, 50);
     port = new UIIncrementBox(p, "port", col, 6969, 1);
     p.set_coords(50, 100, 290, 40);
